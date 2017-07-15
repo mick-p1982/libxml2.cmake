@@ -1,12 +1,21 @@
 cmake_minimum_required(VERSION 2.8.10)
-project( xml2 )
 
+#COLLADA-DOM #disable no VERSION warnings
+cmake_policy(SET CMP0048 OLD)
+
+project( xml2 ) 
+		
 if(MINGW OR UNIX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-attributes")
 endif()
 
 
-set(XML2_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libxml2)
+#COLLADA-DOM
+#Modifying https://github.com/martell/libxml2.cmake to provide an indirect
+#sources directory. 
+#set(XML2_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libxml2)
+set(XML2_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../trunk)
+
 include_directories( "${XML2_SOURCE_DIR}/include" "${CMAKE_INSTALL_PREFIX}/include")
 LINK_DIRECTORIES("${CMAKE_INSTALL_PREFIX}/lib")
 
@@ -18,6 +27,7 @@ file( GLOB XML2_SOURCES ${XML2_SOURCE_DIR}/*.c )
 
 file( GLOB API_HEADERS ${XML2_SOURCE_DIR}/include/libxml/*.h )
 
+#COLLADA-DOM #Didn't comment these out. What is this? Not OpenGL's GLEW.
 #source_group( libxml FILES ${GLEW_HEADERS} )
 #source_group( src    FILES ${GLEW_SOURCES} )
 #include_directories(${ANDROID_NDK}/platforms/android-14/arch-arm/usr/include/asm)
@@ -32,19 +42,23 @@ else()
 endif()
 
 add_library( xml2 ${XML2_LIBTYPE} ${XML2_SOURCES} ${XML2_HEADERS} )
-target_link_libraries(xml2 iconv ws2_32)
+
+#COLLADA-DOM
+#Win sockets? Don't require iconv.
+#target_link_libraries(xml2 iconv ws2_32)
 
 set_target_properties(xml2 PROPERTIES PUBLIC_HEADER "${API_HEADERS}")
 
-set(BINDIR bin)
-set(BINCOMPONENT runtime)
-set(LIBDIR lib)
-set(LIBCOMPONENT dev)
-set(INCLUDEDIR include/libxml)
-set(INCLUDECOMPONENT dev)
-
-install(TARGETS xml2
+if(0) #COLLADA-DOM #NOT-INSTALLING
+	set(BINDIR bin)
+	set(BINCOMPONENT runtime)
+	set(LIBDIR lib)
+	set(LIBCOMPONENT dev)
+	set(INCLUDEDIR include/libxml)
+	set(INCLUDECOMPONENT dev)	
+	install(TARGETS xml2
 	RUNTIME DESTINATION ${BINDIR} COMPONENT ${BINCOMPONENT}
 	LIBRARY DESTINATION ${LIBDIR} COMPONENT ${LIBCOMPONENT}
 	ARCHIVE DESTINATION ${LIBDIR} COMPONENT ${LIBCOMPONENT}
 	PUBLIC_HEADER DESTINATION ${INCLUDEDIR} COMPONENT ${INCLUDECOMPONENT})
+endif(0)
